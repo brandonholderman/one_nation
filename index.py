@@ -65,11 +65,11 @@ array = pd.DataFrame(dataset).iloc[:, (0)]
 
 # print(df)
 
-sia = SIA()
+analyzer = SIA()
 results = []
 
 for line in array:
-    pol_score = sia.polarity_scores(line)
+    pol_score = analyzer.polarity_scores(line)
     pol_score['Text'] = line
     results.append(pol_score)
 
