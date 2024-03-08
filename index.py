@@ -39,12 +39,14 @@
 # print(df.head())
 # np.char.decode(df)
 
-
-import nltk
-import numpy as np
+##
+# import nltk
+# import numpy as np
 import pandas as pd
 from pandas import read_csv
-from nltk.sentiment.vader import SentimentIntensityAnalyzer as SIA
+# from nltk.sentiment.vader import SentimentIntensityAnalyzer as SIA
+from flair.models import TextClassifier
+from flair.data import Sentence
 
 
 url = "./rdata.csv"
@@ -63,16 +65,38 @@ names = [
 dataset = read_csv(url, names=names).values
 array = pd.DataFrame(dataset).iloc[:, (0)]
 
-# print(df)
+# print(dataset)
 
-analyzer = SIA()
-results = []
+# analyzer = SIA()
+# results = []
+
+# for line in array:
+#     pol_score = analyzer.polarity_scores(line)
+#     pol_score['Title'] = line
+#     results.append(pol_score)
+
+#     # print("{:-<65} {} \n".format(line, str(pol_score)))
+# # print("{:-<65} {}".format(line, str(pol_score)))
+# # print(results[:10])
+
+# df = pd.DataFrame.from_records(results)
+# # df['rating'] = 0
+# # df.loc[df['compound'] > 0.2, 'rating'] = 1
+# # df.loc[df['compound'] < -0.2, 'rating'] = -1
+# print(df.head(60))
+
+# df2 = df[['Title', 'rating']]
+# df2.to_csv('analyzed_reddit_data.csv', encoding='utf-8', index=False)
+# print(df2.head())
+##
+
 
 for line in array:
-    pol_score = analyzer.polarity_scores(line)
-    pol_score['Text'] = line
-    results.append(pol_score)
-
-    print("{:-<65} {} \n".format(line, str(pol_score)))
-# print("{:-<65} {}".format(line, str(pol_score)))
-# print(results[:10])
+    # Load pre-trained sentiment analysis model
+    sentiment_model = TextClassifier.load('en-sentiment')
+    # Create a sentence
+    sentence = Sentence(line)
+    # Predict sentiment
+    sentiment_model.predict(sentence)
+    # Access the predicted label
+    print(sentence.labels)
