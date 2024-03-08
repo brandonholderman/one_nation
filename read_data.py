@@ -18,8 +18,7 @@ class ReadData:
     ]
 
     def __init__(self):
-        self.counter = 0
-        self.count = 15
+        self.data = []
 
     def __iter__(self):
         return self
@@ -30,10 +29,23 @@ class ReadData:
         return df
 
     def counter_func(self, count):
-
-        for i in range(self.count):
-            self.counter += 1
-            if self.counter >= self.count:
-                print('End of Training Run')
+        counter = 0
+        for i in range(count):
+            if counter >= count:
+                print(f'{counter} + End of Training Run')
                 break
+            else:
+                counter += 1
             
+
+# def counter_func(func_run):
+#     counter = 0
+#     arr = []
+
+#     for i in range(func_run):
+#         counter += 1
+#         # print(counter)
+#         arr.append(counter)
+#         # print(arr[i])
+#         if counter >= 15:
+#             break
