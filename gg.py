@@ -1,3 +1,5 @@
+import time
+
 def counter_func(func_run):
     counter = 0
     arr = []
@@ -6,15 +8,10 @@ def counter_func(func_run):
         counter += 1
         # print(counter)
         arr.append(counter)
-        # print(arr[i])
-        if counter >= 15:
+        print(counter)
+        time.sleep(1)
+        if counter >= func_run:
             break
-    
     # print(arr)
 
-
-
-
-
-
-counter_func(30)
+counter_func(3)
