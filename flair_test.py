@@ -73,11 +73,16 @@ def run_flair():
             similarity = calculate_similarity(emb1, emb2)
             
             # Determine the label
-            label = 'Neutral'
-            if similarity > 0.5:
-                label = 'Positive'
-            elif similarity < -0.5:
-                label = 'Negative'
+            if similarity > 0.7:
+                label = 'Strong Positive'
+            elif 0.5 < similarity <= 0.7:
+                label = 'Moderate Positive'
+            elif -0.5 <= similarity <= 0.5:
+                label = 'Neutral'
+            elif -0.7 <= similarity < -0.5:
+                label = 'Moderate Negative'
+            else:
+                label = 'Strong Negative'
 
             # Append detailed results
             results.append({
@@ -102,7 +107,7 @@ def run_flair():
     print(f"Detailed similarity analysis completed. Results saved to {output_file}.")
 
 for key, line in df.items():
-    if key >= 10:
+    if key >= 15:
         run_nerd_bar()
         print('End of Test Run')
         break
