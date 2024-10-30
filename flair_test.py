@@ -48,12 +48,13 @@ def run_flair():
     for index, row in df.iterrows():
         party = row['Political Lean']
         description = row['Title']
-        embeddings[party] = get_embedding(description)
+        embeddings[party] = {
+            'description': description,
+            'embedding': get_embedding(description)
+        }
 
     # Function to calculate similarity between two parties
-    def calculate_similarity(party1, party2):
-        emb1 = embeddings[party1]
-        emb2 = embeddings[party2]
+    def calculate_similarity(emb1, emb2):
         similarity_score = cosine_similarity(emb1.unsqueeze(0), emb2.unsqueeze(0))
         return similarity_score.item()
 
@@ -64,20 +65,26 @@ def run_flair():
         for j in range(i + 1, len(parties)):
             party1 = parties[i]
             party2 = parties[j]
-            similarity = calculate_similarity(party1, party2)
+            emb1 = embeddings[party1]['embedding']
+            emb2 = embeddings[party2]['embedding']
+            desc1 = embeddings[party1]['description']
+            desc2 = embeddings[party2]['description']
             
-            # Label the similarity
+            similarity = calculate_similarity(emb1, emb2)
+            
+            # Determine the label
+            label = 'Neutral'
             if similarity > 0.5:
                 label = 'Positive'
             elif similarity < -0.5:
                 label = 'Negative'
-            else:
-                label = 'Neutral'
-            
-            # Append to results
+
+            # Append detailed results
             results.append({
                 'Party 1': party1,
                 'Party 2': party2,
+                'Description 1': desc1,
+                'Description 2': desc2,
                 'Similarity Score': similarity,
                 'Label': label
             })
@@ -85,11 +92,14 @@ def run_flair():
     # Convert results to DataFrame
     results_df = pd.DataFrame(results)
 
+    # Highlight rows with positive scores
+    results_df['Highlight'] = results_df['Label'].apply(lambda x: 'YES' if x == 'Positive' else 'NO')
+
     # Save the results to a CSV file
     output_file = './comparison.csv'
     results_df.to_csv(output_file, index=False)
 
-    print(f"Similarity analysis completed. Results saved to {output_file}.")
+    print(f"Detailed similarity analysis completed. Results saved to {output_file}.")
 
 for key, line in df.items():
     if key >= 10:
