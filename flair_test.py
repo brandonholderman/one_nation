@@ -1,20 +1,21 @@
-import torch
 import pandas as pd
 from flair.models import TextClassifier
 from flair.data import Sentence
 from flair.datasets import UD_ENGLISH
-from flair.embeddings import WordEmbeddings
-from flair.models import SequenceTagger
-from flair.trainers import ModelTrainer
 from torch.nn.functional import cosine_similarity
 from flair.embeddings import TransformerDocumentEmbeddings
 from ReadData import ReadData
 from progress_bar import run_nerd_bar
+# from flair.embeddings import WordEmbeddings
+# from flair.models import SequenceTagger
+# from flair.trainers import ModelTrainer
+# import torch
 
 rd = ReadData()
 df = rd._data_reader()
 corpus = UD_ENGLISH().downsample(0.1)
 print(corpus)
+
 
 def run_flair():
     sentiment_model = TextClassifier.load('en-sentiment')
@@ -24,7 +25,6 @@ def run_flair():
     sentiment_model.predict(sentence)
     # Access the predicted label
     print(sentence.labels)
-
 
     # Load data from CSV
     data_file = "./rdata.csv"
@@ -94,20 +94,21 @@ def run_flair():
                 'Label': label
             })
 
-    # Convert results to DataFrame
-    results_df = pd.DataFrame(results)
+            # Convert results to DataFrame
+            results_df = pd.DataFrame(results)
 
-    # Highlight rows with positive scores
-    results_df['Highlight'] = results_df['Label'].apply(lambda x: 'YES' if x == 'Positive' else 'NO')
+            # Highlight rows with positive scores
+            results_df['Highlight'] = results_df['Label'].apply(lambda x: 'YES' if x == 'Positive' else 'NO')
 
-    # Save the results to a CSV file
-    output_file = './comparison.csv'
-    results_df.to_csv(output_file, index=False)
+            # Save the results to a CSV file
+            output_file = './comparison.csv'
+            results_df.to_csv(output_file, index=False)
 
-    print(f"Detailed similarity analysis completed. Results saved to {output_file}.")
+            print(f"Detailed similarity analysis completed. Results saved to {output_file}.")
+
 
 for key, line in df.items():
-    if key >= 15:
+    if key >= 3:
         run_nerd_bar()
         print('End of Test Run')
         break
