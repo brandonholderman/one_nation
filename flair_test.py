@@ -58,58 +58,53 @@ def run_flair():
         similarity_score = cosine_similarity(emb1.unsqueeze(0), emb2.unsqueeze(0))
         return similarity_score.item()
 
-    # Generate similarity results focusing on the current party
+    # Generate similarity results
     results = []
     parties = list(embeddings.keys())
     for i in range(len(parties)):
-        current_party = parties[i]
-        current_description = embeddings[current_party]['description']
-        current_embedding = embeddings[current_party]['embedding']
+        for j in range(i + 1, len(parties)):
+            party1 = parties[i]
+            party2 = parties[j]
+            emb1 = embeddings[party1]['embedding']
+            emb2 = embeddings[party2]['embedding']
+            desc1 = embeddings[party1]['description']
+            desc2 = embeddings[party2]['description']
+            
+            similarity = calculate_similarity(emb1, emb2)
+            
+            # Determine the label
+            if similarity > 0.7:
+                label = 'Strong Positive'
+            elif 0.5 < similarity <= 0.7:
+                label = 'Moderate Positive'
+            elif -0.5 <= similarity <= 0.5:
+                label = 'Neutral'
+            elif -0.7 <= similarity < -0.5:
+                label = 'Moderate Negative'
+            else:
+                label = 'Strong Negative'
 
-        for j in range(len(parties)):
-            if i != j:  # Skip self-comparison
-                compared_party = parties[j]
-                compared_description = embeddings[compared_party]['description']
-                compared_embedding = embeddings[compared_party]['embedding']
+            # Append detailed results
+            results.append({
+                'Party 1': party1,
+                'Party 2': party2,
+                'Description 1': desc1,
+                'Description 2': desc2,
+                'Similarity Score': similarity,
+                'Label': label
+            })
 
-                similarity = calculate_similarity(current_embedding, compared_embedding)
+            # Convert results to DataFrame
+            results_df = pd.DataFrame(results)
 
-                # Refine the label based on thresholds
-                if similarity > 0.7:
-                    label = 'Strong Positive'
-                elif 0.5 < similarity <= 0.7:
-                    label = 'Moderate Positive'
-                elif -0.5 <= similarity <= 0.5:
-                    label = 'Neutral'
-                elif -0.7 <= similarity < -0.5:
-                    label = 'Moderate Negative'
-                else:
-                    label = 'Strong Negative'
+            # Highlight rows with positive scores
+            results_df['Highlight'] = results_df['Label'].apply(lambda x: 'YES' if x == 'Positive' else 'NO')
 
-                # Append detailed results for the current party
-                results.append({
-                    'Party': current_party,
-                    'Description': current_description,
-                    'Compared Party': compared_party,
-                    'Compared Description': compared_description,
-                    'Similarity Score': similarity,
-                    'Label': label
-                })
-                
-                # Clear existing output data
-                output_file = './comparison.csv'
-                open(output_file, 'w').close() 
+            # Save the results to a CSV file
+            output_file = './comparison.csv'
+            results_df.to_csv(output_file, index=False)
 
-                # Convert results to DataFrame
-                results_df = pd.DataFrame(results)
-
-                # Highlight rows with positive scores
-                results_df['Highlight'] = results_df['Label'].apply(lambda x: 'YES' if x == 'Positive' else 'NO')
-
-                # Save the results to a CSV file
-                results_df.to_csv(output_file, index=False)
-
-                print(f"Detailed similarity analysis completed. Results saved to {output_file}.")
+            print(f"Detailed similarity analysis completed. Results saved to {output_file}.")
 
 
 for key, line in df.items():
