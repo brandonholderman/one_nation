@@ -95,6 +95,10 @@ def run_flair():
                     'Similarity Score': similarity,
                     'Label': label
                 })
+                
+                # Clear existing output data
+                output_file = './comparison.csv'
+                open(output_file, 'w').close() 
 
                 # Convert results to DataFrame
                 results_df = pd.DataFrame(results)
@@ -103,7 +107,6 @@ def run_flair():
                 results_df['Highlight'] = results_df['Label'].apply(lambda x: 'YES' if x == 'Positive' else 'NO')
 
                 # Save the results to a CSV file
-                output_file = './comparison.csv'
                 results_df.to_csv(output_file, index=False)
 
                 print(f"Detailed similarity analysis completed. Results saved to {output_file}.")
