@@ -29,93 +29,85 @@ def run_flair():
     # Load data from CSV
     data_file = "./rdata.csv"
     df = pd.read_csv(data_file)
+    output_file = "./sentiment_analysis.csv"
 
     # Ensure that the data contains the necessary columns
     if 'Political Lean' not in df.columns or 'Title' not in df.columns:
         raise ValueError("The dataset must contain 'Party' and 'Description' columns.")
 
-    # Initialize transformer embeddings (using a base model like 'distilbert-base-uncased')
-    embedding_model = TransformerDocumentEmbeddings('distilbert-base-uncased')
+    # # Initialize transformer embeddings (using a base model like 'distilbert-base-uncased')
+    # embedding_model = TransformerDocumentEmbeddings('distilbert-base-uncased')
 
-    # Generate embeddings for each party's description
-    def get_embedding(text):
-        sentence = Sentence(text)
-        embedding_model.embed(sentence)
-        return sentence.get_embedding()
+    # # Generate embeddings for each party's description
+    # def get_embedding(text):
+    #     sentence = Sentence(text)
+    #     embedding_model.embed(sentence)
+    #     return sentence.get_embedding()
 
     # Store embeddings in a dictionary for reference
-    embeddings = {}
-    for index, row in df.iterrows():
-        party = row['Political Lean']
-        description = row['Title']
-        embeddings[party] = {
-            'description': description,
-            'embedding': get_embedding(description)
-        }
+    # embeddings = {}
+    # for index, row in df.iterrows():
+    #     party = row['Political Lean']
+    #     description = row['Title']
+    #     embeddings[party] = {
+    #         'description': description,
+    #         'embedding': get_embedding(description)
+    #     }
 
-    # Function to calculate similarity between two parties
-    def calculate_similarity(emb1, emb2):
-        similarity_score = cosine_similarity(emb1.unsqueeze(0), emb2.unsqueeze(0))
-        return similarity_score.item()
+      # Function to analyze sentiment of a given text
+    def analyze_sentiment(text):
+        sentence = Sentence(text)
+        sentiment_model.predict(sentence)
+        score = sentence.labels[0].score  # Confidence score of sentiment
+        label = sentence.labels[0].value  # Positive or Negative
 
-    # Generate similarity results focusing on the current party
+        # Convert raw sentiment label into a more detailed classification
+        if label == "POSITIVE":
+            if score > 0.75:
+                return score, "Strongly Positive"
+            elif score > 0.5:
+                return score, "Moderately Positive"
+            else:
+                return score, "Slightly Positive"
+        else:  # NEGATIVE
+            if score > 0.75:
+                return score, "Strongly Negative"
+            elif score > 0.5:
+                return score, "Moderately Negative"
+            else:
+                return score, "Slightly Negative"
+
+    # Process each row and analyze sentiment
     results = []
-    parties = list(embeddings.keys())
-    for i in range(len(parties)):
-        current_party = parties[i]
-        current_description = embeddings[current_party]['description']
-        current_embedding = embeddings[current_party]['embedding']
+    for index, row in df.iterrows():
+        title = row['Title']
+        political_lean = row['Political Lean']
+        subreddit = row['Subreddit']
 
-        for j in range(len(parties)):
-            if i != j:  # Skip self-comparison
-                compared_party = parties[j]
-                compared_description = embeddings[compared_party]['description']
-                compared_embedding = embeddings[compared_party]['embedding']
+        sentiment_score, sentiment_label = analyze_sentiment(title)
 
-                similarity = calculate_similarity(current_embedding, compared_embedding)
+        # Store results
+        results.append({
+            'Title': title,
+            'Political Lean': political_lean,
+            'Subreddit': subreddit,
+            'Sentiment Score': sentiment_score,
+            'Sentiment Label': sentiment_label
+        })
 
-                # Refine the label based on thresholds
-                if similarity > 0.7:
-                    label = 'Strong Positive'
-                elif 0.5 < similarity <= 0.7:
-                    label = 'Moderate Positive'
-                elif -0.5 <= similarity <= 0.5:
-                    label = 'Neutral'
-                elif -0.7 <= similarity < -0.5:
-                    label = 'Moderate Negative'
-                else:
-                    label = 'Strong Negative'
+    # Convert results to DataFrame and save to CSV
+    results_df = pd.DataFrame(results)
+    results_df.to_csv(output_file, index=False)
 
-                # Append detailed results for the current party
-                results.append({
-                    'Party': current_party,
-                    'Description': current_description,
-                    'Compared Party': compared_party,
-                    'Compared Description': compared_description,
-                    'Similarity Score': similarity,
-                    'Label': label
-                })
-                
-                # Clear existing output data
-                output_file = './comparison.csv'
-                open(output_file, 'w').close() 
-
-                # Convert results to DataFrame
-                results_df = pd.DataFrame(results)
-
-                # Highlight rows with positive scores
-                results_df['Highlight'] = results_df['Label'].apply(lambda x: 'YES' if x == 'Positive' else 'NO')
-
-                # Save the results to a CSV file
-                results_df.to_csv(output_file, index=False)
-
-                print(f"Detailed similarity analysis completed. Results saved to {output_file}.")
+    print(f"Sentiment analysis completed. Results saved to {output_file}.")
 
 
-for key, line in df.items():
-    if key >= 3:
-        run_nerd_bar()
-        print('End of Test Run')
-        break
-    else:
-        run_flair()
+# for key, line in df.items():
+#     if key >= 3:
+#         run_nerd_bar()
+#         print('End of Test Run')
+#         break
+#     else:
+#         run_flair()
+
+run_flair()
