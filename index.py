@@ -102,12 +102,10 @@ def run_flair():
     print(f"Sentiment analysis completed. Results saved to {output_file}.")
 
 
-# for key, line in df.items():
-#     if key >= 3:
-#         run_nerd_bar()
-#         print('End of Test Run')
-#         break
-#     else:
-#         run_flair()
-
-run_flair()
+for key, line in df.items():
+    if key >= 3:
+        run_nerd_bar()
+        print('End of Test Run')
+        break
+    else:
+        run_flair()
