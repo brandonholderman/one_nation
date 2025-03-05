@@ -15,3 +15,21 @@ def counter_func(func_run):
     # print(arr)
 
 counter_func(3)
+
+
+
+    # def __call__(self):
+    #     self.count += 1
+    #     return count
+
+    # def counter_func(self, count):
+    #     counter = self.counter
+
+    #     for i in range(count):
+    #         if counter >= count:
+    #             print(f'{counter} - Conditional Hit, End of Training Run')
+    #             break
+    #         else:
+    #             counter += 1
+    #             print(f'{counter} - Increase counter function ran')
+    #             return
